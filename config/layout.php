@@ -1,4 +1,13 @@
-<?php
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+/*
+|--------------------------------------------------------------------------
+| Layout: Config item wrapper.
+|--------------------------------------------------------------------------
+|
+*/
+
+$config['layout'] = array();
 
 /*
 |--------------------------------------------------------------------------
@@ -20,43 +29,15 @@
 |		'-YIELD-',
 |		'footer_template'
 |	)
-
-
-
 */
 
-$layout['templates'] = array(
+$config['layout']['templates'] = array(
 
 	// default template
 	'main'	=>	array(
 		'-YIELD-'
 	)
 );
-
-
-/*
-|--------------------------------------------------------------------------
-| Layout: CSS Prefix.
-|--------------------------------------------------------------------------
-|
-| This prefix will be prepended to your requested CSS files, and can be
-| used to specify a global location for your CSS files.
-|
-*/
-
-$layout['css_prefix'] = '';
-
-/*
-|--------------------------------------------------------------------------
-| Layout: JS Prefix.
-|--------------------------------------------------------------------------
-|
-| This prefix will be prepended to your requested JS files, and can be
-| used to specify a global location for your JS files.
-|
-*/
-
-$layout['js_prefix'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +50,6 @@ $layout['js_prefix'] = '';
 |
 */
 
-$layout['default_values'] = array(
+$config['layout']['default_values'] = array(
 	// format 'key' => 'value',
 );

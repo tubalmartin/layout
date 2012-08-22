@@ -33,47 +33,46 @@
  */
 class Layout
 {
-	// config loaded templates
+	// config loaded templates & default values
 	private $templates 				= array();
+	private $default_values         = array();
 
 	// values set by the chain
 	private $active_template 		= 'main';
-	private $assets 				= array();
 	private $data 					= array();
 
 	// reference to the codeigniter object
 	private $ci;
 
-	// layout config
-	private $config;
-
 	public function __construct()
 	{
 		// get the config
-		include(APPPATH.'config/layout.php');
+		$config = config_item('layout');
 
-		// save the config for later
-		$this->config = $layout;
-
-		// set the templates from the config
-		$this->templates = $this->config['templates'];
+		// set the templates & default values from the config
+		$this->templates = $config['templates'];
+		$this->default_values = $config['default_values'];
 
 		// get hold of the codeigniter object
 		$this->ci =& get_instance();
 	}
 
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 
 	/**
 	 * Render the view.
-	 * 
+	 *
 	 * @access public
 	 * @param string The view to display.
 	 * @param array Data to provide to the view.
-	 * @return void
+	 * @param bool Boolean to return view as string or not
+	 * @return void|string
 	 */
-	public function show($view, $data = null)
+	public function render($view, $data = null, $return = false)
 	{
+		// Container for the generated view as a string
+		$view_string = '';
+
 		// if we have been given data, merge it
 		if($data != null && is_array($data))
 		{
@@ -94,27 +93,63 @@ class Layout
 		foreach($this->templates[$this->active_template] as $temp)
 		{
 			// yield inserts the main content
-			if($temp === '-YIELD-')
+			$_view = $temp === '-YIELD-' ? $view : $temp;
+
+			if ($return === true)
 			{
-				$this->ci->load->view($view, $this->data);
+				$view_string .= $this->ci->load->view($_view, $this->data, true);
 			}
 			else
 			{
-				// load the view with the class data array
-				$this->ci->load->view($temp, $this->data);
+				$this->ci->load->view($_view, $this->data);
 			}
-			
 		}
 
 		// reset the chain, clankety clank
 		$this->_cleanup();
+
+		// View as string? return it
+		if ($return === true)
+		{
+			return $view_string;
+		}
 	}
 
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
+
+	/**
+	 * Show the view.
+	 *
+	 * @access public
+	 * @param string The view to display.
+	 * @param array Data to provide to the view.
+	 * @return void
+	 */
+	public function show($view, $data = null)
+	{
+		$this->render($view, $data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get the view.
+	 *
+	 * @access public
+	 * @param string The view to display.
+	 * @param array Data to provide to the view.
+	 * @return string
+	 */
+	public function get($view, $data = null)
+	{
+		return $this->render($view, $data, true);
+	}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Select a different template.
-	 * 
+	 *
 	 * @access public
 	 * @param string The name of the template.
 	 * @return Layout
@@ -127,78 +162,16 @@ class Layout
 		return $this;
 	}
 
-	// --------------------------------------------------------------------	
-
-	/**
-	 * Attach a JavaScript to this view.
-	 * 
-	 * @access public
-	 * @param mixed The name of the javascript file, or array.
-	 * @param boolean Add the javascript prefix?
-	 * @return Layout
-	 */	
-	public function js($asset, $prefix = true)
-	{
-		// check to see if we have an array of assets
-		if(is_array($asset))
-		{
-			// loop the given array passing back to this method
-			foreach ($asset as $a)
-			{
-				$this->js($a, $prefix);
-			}
-		}
-		else
-		{
-			// add the asset to the assets array
-			if($prefix) $asset = $this->config['js_prefix'] . $asset;
-			$this->assets['js'][] = $asset;
-		}
-
-		return $this;
-	}
-
 	// --------------------------------------------------------------------
 
 	/**
-	 * Attach a CSS stylesheet to this view.
-	 * 
-	 * @access public
-	 * @param mixed The name of the stylesheet file, or array.
-	 * @param boolean Add the CSS prefix?
-	 * @return Layout
-	 */		
-	public function css($asset, $prefix = true)
-	{
-		// check to see if we have an array of assets
-		if(is_array($asset))
-		{
-			// loop the given array passing back to this method
-			foreach ($asset as $a)
-			{
-				$this->css($a, $prefix);
-			}
-		}
-		else
-		{
-			// add the asset to the assets array
-			if($prefix) $asset = $this->config['css_prefix'] . $asset;
-			$this->assets['css'][] = $asset;
-		}
-
-		return $this;	
-	}
-
-	// --------------------------------------------------------------------	
-
-	/**
 	 * Bind a value to the view.
-	 * 
+	 *
 	 * @access public
 	 * @param string The variable name.
 	 * @param mixed The value.
 	 * @return Layout
-	 */		
+	 */
 	public function bind($key, $value)
 	{
 		// add the value to our data array
@@ -207,38 +180,34 @@ class Layout
 		return $this;
 	}
 
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 
 	/**
 	 * Bind a value to the view.
-	 * 
+	 *
 	 * @access private
 	 * @param array The view data array.
 	 * @return array The Modified view data array.
-	 */	
+	 */
 	private function _prepare($data)
 	{
-		// bind our assets
-		$data['assets'] = $this->assets;
-
 		// add our default values, but existing ones take priority
-		$data = array_merge($this->config['default_values'], $data);
+		$data = array_merge($this->default_values, $data);
 
 		return $data;
 	}
 
-	// --------------------------------------------------------------------	
+	// --------------------------------------------------------------------
 
 	/**
 	 * Reset all values after a chain trigger.
-	 * 
+	 *
 	 * @access private
-	 */	
+	 */
 	private function _cleanup()
 	{
 		// reset the chain using default values
 		$this->active_template = 'main';
-		$this->assets = array();
-		$this->data = array();		
+		$this->data = array();
 	}
 }
