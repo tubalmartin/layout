@@ -24,19 +24,19 @@ $config['layout'] = array();
 |
 | For example :
 |
-|	'my_template'	=>	array(
-|		'header_template',
-|		'-YIELD-',
-|		'footer_template'
-|	)
+|   'my_template'   =>  array(
+|       'header_template',
+|       '-YIELD-',
+|       'footer_template'
+|   )
 */
 
 $config['layout']['templates'] = array(
 
-	// default template
-	'main'	=>	array(
-		'-YIELD-'
-	)
+    // default template
+    'main'  =>  array(
+        '-YIELD-'
+    )
 );
 
 /*
@@ -51,5 +51,5 @@ $config['layout']['templates'] = array(
 */
 
 $config['layout']['default_values'] = array(
-	// format 'key' => 'value',
+    // format 'key' => 'value',
 );
