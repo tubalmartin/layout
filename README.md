@@ -86,7 +86,7 @@ In the controller:
 ```php
 <?php
 
-$this->layout->show('my_view', array('dog' = 'Rover'));
+$this->layout->show('my_view', array('dog' => 'Rover'));
 ```
 In the view:
 ```html
